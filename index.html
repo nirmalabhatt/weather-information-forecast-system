@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-Time Weather Information and Forecast Visualization System</title>
+    <meta
+      name="description"
+      content="Real-time weather information, 24-hour hourly forecast, 5-day weather forecast, and temperature trend visualization using OpenWeatherMap Web APIs."
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="weather">
+      <!-- Search & Geolocation Bar -->
+      <div class="search_container">
+        <div class="search_box">
+          <input
+            type="search"
+            list="suggestions"
+            class="weather_search"
+            placeholder="Enter City Name..."
+            aria-label="Search city name"
+          />
+          <datalist id="suggestions"></datalist>
+        </div>
+        <button id="location_btn" class="location_btn" type="button">
+          📍 Use My Location
+        </button>
+      </div>
+
+      <!-- Loading State Indicator -->
+      <div id="loading_spinner" class="loading_spinner hidden">
+        <div class="spinner"></div>
+        <span>Loading weather data...</span>
+      </div>
+
+      <!-- Recent Searches Bar -->
+      <div class="recent_searches_container hidden" id="recent_searches_container">
+        <div class="recent_header">
+          <span class="recent_title">Recent Searches:</span>
+          <button id="clear_recent_btn" class="clear_recent_btn" type="button">
+            Clear History
+          </button>
+        </div>
+        <div class="recent_tags" id="recent_tags"></div>
+      </div>
+
+      <!-- Main Current Weather Display -->
+      <div class="weather_today">
+        <div class="weather_details">
+          <div class="city_unit_header">
+            <h2 class="weather_city">City</h2>
+            <!-- °C / °F Unit Toggle -->
+            <div class="unit_toggle">
+              <button type="button" class="unit_btn active" id="unit_c" data-unit="C">
+                &deg;C
+              </button>
+              <span class="unit_divider">|</span>
+              <button type="button" class="unit_btn" id="unit_f" data-unit="F">
+                &deg;F
+              </button>
+            </div>
+          </div>
+          
+          <p class="weather_day">Day</p>
+          <p class="weather_condition" id="weather_condition"></p>
+
+          <!-- Legacy Indicator elements (Humidity, Wind, Pressure) -->
+          <div class="weather_current">
+            <p class="weather_indicator weather_indicator--humidity">
+              <span class="value">50</span>%
+            </p>
+            <p class="weather_indicator weather_indicator--wind">
+              <span class="value">West, 5</span>m/s
+            </p>
+            <p class="weather_indicator weather_indicator--pressure">
+              <span class="value">1050</span>hPa
+            </p>
+          </div>
+        </div>
+
+        <img src="images/clear-sky.png" alt="Clear sky" class="weather_image" />
+
+        <div class="weather_temperature">
+          <span class="value">+25</span> &deg;<span class="unit_symbol">C</span>
+        </div>
+      </div>
+
+      <!-- Expanded Current Weather Details Grid -->
+      <div class="expanded_details_section">
+        <h3 class="section_title">Weather Details</h3>
+        <div class="details_grid">
+          <div class="detail_card">
+            <span class="detail_label">Feels Like</span>
+            <span class="detail_value" id="detail_feels_like">--</span>
+          </div>
+          <div class="detail_card">
+            <span class="detail_label">Humidity</span>
+            <span class="detail_value" id="detail_humidity">--</span>
+          </div>
+          <div class="detail_card">
+            <span class="detail_label">Wind</span>
+            <span class="detail_value" id="detail_wind">--</span>
+          </div>
+          <div class="detail_card">
+            <span class="detail_label">Pressure</span>
+            <span class="detail_value" id="detail_pressure">--</span>
+          </div>
+          <div class="detail_card">
+            <span class="detail_label">Visibility</span>
+            <span class="detail_value" id="detail_visibility">--</span>
+          </div>
+          <div class="detail_card">
+            <span class="detail_label">Sunrise</span>
+            <span class="detail_value" id="detail_sunrise">--</span>
+          </div>
+          <div class="detail_card">
+            <span class="detail_label">Sunset</span>
+            <span class="detail_value" id="detail_sunset">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hourly Forecast Section (24 Hours) -->
+      <div class="hourly_section">
+        <h3 class="section_title">Hourly Forecast (Next 24 Hours)</h3>
+        <div class="hourly_container" id="hourly_container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Temperature Trend Visualization Chart -->
+      <div class="chart_section">
+        <h3 class="section_title">Temperature Trend</h3>
+        <div class="chart_container">
+          <canvas id="tempTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Multi-Day Forecast Section -->
+      <div class="forecast_section">
+        <h3 class="section_title">5-Day Forecast</h3>
+        <div class="weather_forecast">
+          <article class="weather_forecast_item">
+            <img
+              src="images/clear-sky.png"
+              alt="Clear sky"
+              class="weather_forecast_icon"
+            />
+            <h3 class="weather_forecast_day">Day</h3>
+            <p class="weather_forecast_temperature">
+              <span class="value">+25</span> &deg;C
+            </p>
+          </article>
+
+          <article class="weather_forecast_item">
+            <img
+              src="images/clear-sky.png"
+              alt="Clear sky"
+              class="weather_forecast_icon"
+            />
+            <h3 class="weather_forecast_day">Day</h3>
+            <p class="weather_forecast_temperature">
+              <span class="value">+25</span> &deg;C
+            </p>
+          </article>
+
+          <article class="weather_forecast_item">
+            <img
+              src="images/clear-sky.png"
+              alt="Clear sky"
+              class="weather_forecast_icon"
+            />
+            <h3 class="weather_forecast_day">Day</h3>
+            <p class="weather_forecast_temperature">
+              <span class="value">+25</span> &deg;C
+            </p>
+          </article>
+
+          <article class="weather_forecast_item">
+            <img
+              src="images/clear-sky.png"
+              alt="Clear sky"
+              class="weather_forecast_icon"
+            />
+            <h3 class="weather_forecast_day">Day</h3>
+            <p class="weather_forecast_temperature">
+              <span class="value">+25</span> &deg;C
+            </p>
+          </article>
+
+          <article class="weather_forecast_item">
+            <img
+              src="images/clear-sky.png"
+              alt="Clear sky"
+              class="weather_forecast_icon"
+            />
+            <h3 class="weather_forecast_day">Day</h3>
+            <p class="weather_forecast_temperature">
+              <span class="value">+25</span> &deg;C
+            </p>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <script src="js/script.js"></script>
+  </body>
+</html>
